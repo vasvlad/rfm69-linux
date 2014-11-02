@@ -1,3 +1,9 @@
+wb-homa-ism-radio (1.09r) stable; urgency=medium
+
+  * Adapted for Raspberry Pi.
+
+ -- Evgeny Boger <boger@contactless.ru>  Thu, 10 Jul 2014 19:53:14 +0400
+
 wb-homa-ism-radio (1.09) stable; urgency=medium
 
   * Oregon Scientfic V3, noolite improvements.

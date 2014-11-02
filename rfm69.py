@@ -58,7 +58,7 @@ class RFM69(object):
 	#~ _powerLevel = 60
 	_powerLevel = 31
 
-	def __init__(self, spi_major = 0, spi_minor = 5, spi_speed = 500000, irq_gpio = 36):
+	def __init__(self, spi_major = 0, spi_minor = 0, spi_speed = 2000000, irq_gpio = 25):
 		self._mode = None
 
 		self.__payloadlen = 0
@@ -101,7 +101,8 @@ class RFM69(object):
 
 
 	def readReg(self, addr):
-		return self.spi.write_then_read([addr & 0x7F], 1)[0] #	# send address + r/w bit
+		return self.spi.write_read([addr & 0x7F], 1)[0] #	# send address + r/w bit
+		#return self.spi.write_then_read([addr & 0x7F], 1)[0] #	# send address + r/w bit
 
 
 	def writeReg(self, addr, value):
