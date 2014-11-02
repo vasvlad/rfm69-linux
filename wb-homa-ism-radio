@@ -17,7 +17,7 @@ DESC="MQTT driver for WB HomA for RFM69 ISM radio"
 NAME=wb-homa-rcd
 BIN_NAME=$NAME
 DAEMON="/usr/bin/python"
-DAEMON_ARGS="/usr/bin/$BIN_NAME"
+DAEMON_ARGS="/usr/bin/$BIN_NAME 0 25"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 # Exit if the package is not installed
