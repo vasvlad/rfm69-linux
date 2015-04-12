@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 wb-homa-ism-radio (1.12) stable; urgency=medium
 
   * fix for rfm69 stuck in transmit mode 
@@ -22,6 +23,18 @@ wb-homa-ism-radio (1.09+1) stable; urgency=medium
   * Do not publish empty devices
 
  -- Evgeny Boger <boger@contactless.ru>  Sat, 25 Oct 2014 02:35:34 +0400
+
+wb-homa-ism-radio (1.09rl) stable; urgency=medium
+
+  * Adapted for Noolite Script Sensor.
+
+ -- Vlad Vasilyeu  <vasvlad@gmail.com> Sun, 02 Nov 2014 09:53:14 +0400
+
+wb-homa-ism-radio (1.09r) stable; urgency=medium
+
+  * Adapted for Raspberry Pi.
+
+ -- Evgeny Boger <boger@contactless.ru>  Thu, 10 Jul 2014 19:53:14 +0400
 
 wb-homa-ism-radio (1.09) stable; urgency=medium
 
