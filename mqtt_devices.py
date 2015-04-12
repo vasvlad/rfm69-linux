@@ -226,7 +226,7 @@ class Cs5211RxDevice(object):
 
         self.device_type_name = "[%s]" % addr
         self.device_name = "cs5211 Sensor %s" % ( addr)
-        self.controls_desc = {'state': state}
+        self.controls_desc = {} 
         if 'state' in data:
             self.controls_desc['state'] =   { 'value' : data['state'],
                                               'meta' :  { 'type' : 'switch',
