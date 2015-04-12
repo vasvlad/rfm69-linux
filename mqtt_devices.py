@@ -229,10 +229,16 @@ class Cs5211RxDevice(object):
         self.controls_desc = {} 
         if 'state' in data:
             self.controls_desc['state'] =   { 'value' : data['state'],
-                                              'meta' :  { 'type' : 'switch',
-                                                        },
-                                              'readonly' : False,
-                                            }
+                                          'meta' :  { 'type' : 'switch',
+                                                    },
+                                          'readonly' : False,
+                                        }
+        else:
+            self.controls_desc['state'] =   { 'value' : 'off',
+                                          'meta' :  { 'type' : 'switch',
+                                                    },
+                                          'readonly' : False,
+                                        }
 
 
 
