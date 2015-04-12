@@ -1,3 +1,28 @@
+wb-homa-ism-radio (1.12) stable; urgency=medium
+
+  * fix for rfm69 stuck in transmit mode 
+
+ -- Evgeny Boger <boger@contactless.ru>  Thu, 18 Dec 2014 22:16:38 +0300
+
+wb-homa-ism-radio (1.11) stable; urgency=medium
+
+  * Add support for Noolite RGB LED dimmer (SD111-180)
+
+ -- Evgeny Boger <boger@contactless.ru>  Sat, 13 Dec 2014 02:49:21 +0300
+
+wb-homa-ism-radio (1.10) stable; urgency=medium
+
+  * Add support for slow down, slow up,  slow switch, slow stop commands for nooLite.
+  * Switch off nooLite devices on level=0
+
+ -- Evgeny Boger <boger@contactless.ru>  Sun, 30 Nov 2014 04:46:12 +0300
+
+wb-homa-ism-radio (1.09+1) stable; urgency=medium
+
+  * Do not publish empty devices
+
+ -- Evgeny Boger <boger@contactless.ru>  Sat, 25 Oct 2014 02:35:34 +0400
+
 wb-homa-ism-radio (1.09) stable; urgency=medium
 
   * Oregon Scientfic V3, noolite improvements.
