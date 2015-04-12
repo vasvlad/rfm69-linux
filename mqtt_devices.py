@@ -221,7 +221,7 @@ class OregonRxDevice(object):
 
 class Cs5211RxDevice(object):
     device_room = None
-    def __init__(self, addr, state):
+    def __init__(self, addr, data = {}):
         self.device_id = "cs5211_rx_tx_%s" % (addr)
 
         self.device_type_name = "[%s]" % addr
