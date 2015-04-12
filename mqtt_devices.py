@@ -228,11 +228,11 @@ class Cs5211RxDevice(object):
         self.device_name = "cs5211 Sensor %s" % ( addr)
         self.controls_desc = {'state': state}
         if 'state' in data:
-        self.controls_desc['state'] =   { 'value' : data['state'],
-                                          'meta' :  { 'type' : 'switch',
-                                                     },
-                                           'readonly' : False,
-                                         }
+            self.controls_desc['state'] =   { 'value' : data['state'],
+                                              'meta' :  { 'type' : 'switch',
+                                                        },
+                                              'readonly' : False,
+                                            }
 
 
 
@@ -241,7 +241,7 @@ class Cs5211RxDevice(object):
 
     def handle_data(self, data):
         var = {}
-         if 'state' in data:
+        if 'state' in data:
             self.controls_desc['state']['value'] = data['state']
       
         return var
