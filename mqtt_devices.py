@@ -222,11 +222,18 @@ class OregonRxDevice(object):
 class Cs5211RxDevice(object):
     device_room = None
     def __init__(self, addr, state):
-        self.device_id = "cs5211_rx_%s" % (addr)
+        self.device_id = "cs5211_rx_tx_%s" % (addr)
 
         self.device_type_name = "[%s]" % addr
         self.device_name = "cs5211 Sensor %s" % ( addr)
         self.controls_desc = {'state': state}
+        if 'state' in data:
+        self.controls_desc['state'] =   { 'value' : data['state'],
+                                          'meta' :  { 'type' : 'switch',
+                                                     },
+                                           'readonly' : False,
+                                         }
+
 
 
     def get_controls(self):
@@ -234,7 +241,9 @@ class Cs5211RxDevice(object):
 
     def handle_data(self, data):
         var = {}
-
+         if 'state' in data:
+            self.controls_desc['state']['value'] = data['state']
+      
         return var
 
     def get_id(self):
