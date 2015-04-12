@@ -49,7 +49,7 @@ class Cs5211ProtocolHandler():
 
         self.kw['raw'] = max(ppp.iteritems(), key=operator.itemgetter(1))[0]
         self.kw['addr'] = self.kw['raw']
-        self.kw['state'] = 1
+        self.kw['state'] = "on" 
         return self.kw
 
 
