@@ -33,15 +33,41 @@ class NooliteTxDevice(object):
 
                                     },
                           },
+                'color'  : { 'value' : '0;0;0',
+                            'meta': {  'type' : 'rgb' ,
+                                       'order' : '5',
+
+                                    },
+                          },
+                'slowup'  : { 'value' : 0,
+                            'meta': {  'type' : 'pushbutton',
+                                       'order' : '6',
+                                    },
+                          },
+                'slowdown'  : { 'value' : 0,
+                            'meta': {  'type' : 'pushbutton',
+                                       'order' : '7',
+                                    },
+                          },
+                'slowswitch'  : { 'value' : 0,
+                            'meta': {  'type' : 'pushbutton',
+                                       'order' : '8',
+                                    },
+                          },
+                'slowstop'  : { 'value' : 0,
+                            'meta': {  'type' : 'pushbutton',
+                                       'order' : '9',
+                                    },
+                          },
                 'bind'  : { 'value' : 0,
                             'meta': {  'type' : 'pushbutton',
-                                       'order' : '5',
+                                       'order' : '20',
                                        'export' : '0',
                                     },
                           },
                 'unbind'  : { 'value' : 0,
                             'meta': {  'type' : 'pushbutton',
-                                       'order' : '6',
+                                       'order' : '21',
                                        'export' : '0',
                                     },
                           },
@@ -60,7 +86,7 @@ class NooliteTxDevice(object):
         return self.controls_desc
 
     def encode_level(self, level):
-        if level < 0:
+        if level <= 0:
             return 0
         else:
             return int(round((100 if (level > 100) else level) * 1.23 + 34))
@@ -94,8 +120,35 @@ class NooliteTxDevice(object):
             var['cmd'] = NooliteCommands.SetLevel
 
             var['arg'] = str(self.encode_level(int(value)))
+
         elif control == 'loadpreset':
             var['cmd'] = NooliteCommands.LoadPreset
+
+        elif control == 'slowup':
+            var['cmd'] = NooliteCommands.SlowUp
+
+        elif control == 'slowdown':
+            var['cmd'] = NooliteCommands.SlowDown
+
+        elif control == 'slowswitch':
+            var['cmd'] = NooliteCommands.SlowSwitch
+
+        elif control == 'slowstop':
+            var['cmd'] = NooliteCommands.SlowStop
+
+        elif control == 'color':
+            var['cmd'] = NooliteCommands.SetLevel
+
+            try:
+                values = value.strip().split(';')
+                assert len(values) == 3
+                values = tuple(int(v) for v in values)
+                var['args'] = "%d;%d;%d" % values
+            except:
+                print "error decoding color"
+                import traceback
+                traceback.print_exc()
+                return
         else:
 
             print "unknown control "
@@ -313,7 +366,7 @@ class OregonRxHandler(object):
             return device
 
 class OregonV3RxHandler(OregonRxHandler):
-	name = "oregon3"
+    name = "oregon3"
 
 
 class NooliteRxHandler(object):
