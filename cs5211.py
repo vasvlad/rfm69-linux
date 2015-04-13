@@ -1,8 +1,6 @@
 #coding: utf-8
 
-import protocols
 import utils
-import os, os.path, sys
 import re
 import operator
 
@@ -11,7 +9,7 @@ import operator
 # (c2) http://www.aliexpress.com/item/Free-shipping-433MHz-Wireless-Water-Intrusion-Detector-Work-With-GSM-PSTN-SMS-Home-Security/1743754761.html
 
 
-tristatecode = {'10001000':'0','11101110':'1','10001110':'F'}
+tristatecode = {'10001000':'0' , '11101110':'1' , '10001110':'F'}
 
 
 class Cs5211ProtocolHandler():
@@ -22,7 +20,7 @@ class Cs5211ProtocolHandler():
         bitstream = utils.get_bits(data)
         packs = []
 #        print "raw: ",bitstream
-        streams = re.split('1{1}0{27}[0-1]{3}0{1}',bitstream) 
+        streams = re.split('1{1}0{27}[0-1]{3}0{1}', bitstream) 
 
         for ar in streams:
             out = ""
