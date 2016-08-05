@@ -101,8 +101,8 @@ class MQTTHandler(object):
         self.initial_retained_received = False
         self.initial_retained_settings = {}
         self.settings = { 'room' : 'System',
-                          'noolite_remotes' : '4',
-                          'noolite_remotes_custom': '-',
+                          'noolite_remotes' : '0',
+                          'noolite_remotes_custom': '7c19,7c18,e3af,7c17,7c00,7c01,ff0,ff1,ff2,5afc,1c00,1111,7d20',
                           'rssi_threshold' : '-85',
                          }
 
@@ -400,8 +400,8 @@ if __name__ == "__main__":
         irq_gpio = int(sys.argv[2])
         # 7 55
     else:
-        spi_minor = 5
-        irq_gpio = 36
+        spi_minor = 0
+        irq_gpio = 25
 
     radio = rfm69.RFM69(spi_minor=spi_minor,irq_gpio=irq_gpio)
 
