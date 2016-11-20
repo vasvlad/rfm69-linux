@@ -59,7 +59,7 @@ def radio_send(data):
 def process_recv_radio_data(data, counter):
     time_str = str(time.time())
     for protocol in protocol_handlers:
-        #~ print protocol
+        print protocol
         decoded = protocol.tryDecode(data)
         if decoded:
             mqtt_handler.handle_recv_data(protocol, decoded)
@@ -102,7 +102,7 @@ class MQTTHandler(object):
         self.initial_retained_settings = {}
         self.settings = { 'room' : 'System',
                           'noolite_remotes' : '0',
-                          'noolite_remotes_custom': '7c19,7c18,e3af,7c17,7c00,7c01,ff0,ff1,ff2,5afc,1c00,1111,7d20',
+                          'noolite_remotes_custom': '7c19,7c18,e3af,7c17,7c00,7c01,ff0,ff1,ff2,5afc,1c00,1111,7d20,56a6,56a7,56a8',
                           'rssi_threshold' : '-85',
                          }
 
@@ -365,7 +365,6 @@ class MQTTHandler(object):
         elif msg.topic == self.random_topic:
             self.on_initial_retained_received()
         elif mosquitto.topic_matches_sub('/devices/+/controls/+/on' , msg.topic):
-
             device_id = parts[2]
             control = parts[4]
 
@@ -406,7 +405,7 @@ if __name__ == "__main__":
     radio = rfm69.RFM69(spi_minor=spi_minor,irq_gpio=irq_gpio)
 
     radio.setPowerLevel(31)
-    #~ radio.setHighPower(True)
+   # radio.setHighPower(True)
     radio.setHighPower(False)
 
     radio.start()
