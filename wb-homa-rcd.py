@@ -102,7 +102,7 @@ class MQTTHandler(object):
         self.initial_retained_settings = {}
         self.settings = { 'room' : 'System',
                           'noolite_remotes' : '0',
-                          'noolite_remotes_custom': '7c19,7c18,e3af,7c17,7c00,7c01,ff0,ff1,ff2,5afc,1c00,1111,7d20,56a6,56a7,56a8',
+                          'noolite_remotes_custom': '7c19,7c18,e3af,7c17,7c00,7c01,ff0,ff1,ff2,5afc,1c00,1111,7d20,56a6,56a7,56a8,5345',
                           'rssi_threshold' : '-85',
                          }
 
