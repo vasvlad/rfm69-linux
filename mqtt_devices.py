@@ -3,6 +3,16 @@ from random import randint
 
 
 class NooliteTxDevice(object):
+    STATELESS_COMMAND_MAP = {
+        'bind':  NooliteCommands.Bind,
+        'unbind': NooliteCommands.Unbind,
+        'switch': NooliteCommands.Switch,
+        'slowup': NooliteCommands.SlowUp,
+        'slowdown': NooliteCommands.SlowDown,
+        'slowswitch': NooliteCommands.SlowSwitch,
+        'slowstop': NooliteCommands.SlowStop,
+    }
+
     def __init__(self, addr, radio_send):
         self.addr = addr
         self.addr_hex = hex(self.addr)
@@ -59,6 +69,12 @@ class NooliteTxDevice(object):
                                        'order' : '9',
                                     },
                           },
+                'shadow_level'  :  { 'value' : 0,
+                              'meta' :  { 'type' : 'range',
+                                          'order' : '10',
+                                          'max' : 100,
+                                        }
+                            },
                 'bind'  : { 'value' : 0,
                             'meta': {  'type' : 'pushbutton',
                                        'order' : '20',
@@ -93,7 +109,7 @@ class NooliteTxDevice(object):
 
 
 
-    def update_control(self, control, value):
+    def update_control(self, control, value, retained = False):
         self.flip = 0 if self.flip else 1
 
 
@@ -103,24 +119,14 @@ class NooliteTxDevice(object):
 
         var['arg'] = '0'
 
-        if control == 'bind':
-            var['cmd'] = NooliteCommands.Bind
-        elif control == 'unbind':
-            var['cmd'] = NooliteCommands.Unbind
-        elif control == 'state':
+        if control == 'state':
             if int(value):
                 var['cmd'] = NooliteCommands.On
             else:
                 var['cmd'] = NooliteCommands.Off
-
-        elif control == 'switch':
-            var['cmd'] = NooliteCommands.Switch
-
         elif control == 'level':
             var['cmd'] = NooliteCommands.SetLevel
-
             var['arg'] = str(self.encode_level(int(value)))
-
         elif control == 'loadpreset':
             var['cmd'] = NooliteCommands.LoadPreset
 
@@ -135,6 +141,9 @@ class NooliteTxDevice(object):
 
         elif control == 'slowstop':
             var['cmd'] = NooliteCommands.SlowStop
+        elif control == 'shadow_level':
+            var['cmd'] = NooliteCommands.ShadowSetBright
+            var['arg'] = str(self.encode_level(int(value)))
 
         elif control == 'color':
             var['cmd'] = NooliteCommands.SetLevel
@@ -149,10 +158,20 @@ class NooliteTxDevice(object):
                 import traceback
                 traceback.print_exc()
                 return
+
+        elif control in self.STATELESS_COMMAND_MAP.keys():
+            #~ print "stateless: ", control, retained
+            # do not send stateless commands on startup (not implemented)
+            #~ if retained:
+                #~ return
+
+            var['cmd'] = self.STATELESS_COMMAND_MAP[control]
+
         else:
 
             print "unknown control "
             return
+
 
 
         data = self.protocol_handler.tryEncode(var)
@@ -199,6 +218,67 @@ class OregonRxDevice(object):
                                                              },
                                                    'readonly' : True,
                                                  }
+        if 'comfort' in data:
+            self.controls_desc['comfort'] =     { 'value' : 0,
+                                                  'meta' :  { 'type' : 'text',
+                                                            },
+                                                  'readonly' : True,
+                                                 }
+        if 'rain_rate' in data:
+            self.controls_desc['rain_rate'] =     { 'value' : 0,
+                                                    'meta' :  { 'type' : 'rainfall',
+                                                              },
+                                                    'readonly' : True,
+                                                 }
+        if 'rain_total' in data:
+            self.controls_desc['rain_total'] =     { 'value' : 0,
+                                                     'meta' :  { 'type' : 'value', 'units' : 'mm',
+                                                               },
+                                                     'readonly' : True,
+                                                 }
+        if 'UV' in data:
+            self.controls_desc['UV'] =     { 'value' : 0,
+                                             'meta' :  { 'type' : 'text',
+                                                       },
+                                             'readonly' : True,
+                                           }
+        if 'windDir' in data:
+            self.controls_desc['wind_direction'] =     { 'value' : 0,
+                                                         'meta' :  { 'type' : 'value', 'units' : 'deg',
+                                                                   },
+                                                         'readonly' : True,
+                                                 }
+        if 'windSpeed' in data:
+            self.controls_desc['wind_speed'] =     { 'value' : 0,
+                                                   'meta' :  { 'type' : 'wind_speed',
+                                                             },
+                                                   'readonly' : True,
+                                                 }
+        if 'windAvgSpeed' in data:
+            self.controls_desc['wind_average_speed'] =     { 'value' : 0,
+                                                   'meta' :  { 'type' : 'wind_speed',
+                                                             },
+                                                   'readonly' : True,
+                                                 }
+        if 'pressure' in data:
+            self.controls_desc['pressure'] =     { 'value' : 0,
+                                                   'meta' :  { 'type' : 'atmospheric_pressure',
+                                                             },
+                                                   'readonly' : True,
+                                                 }
+        if 'forecast' in data:
+            self.controls_desc['weather_forecast'] =     { 'value' : 0,
+                                                           'meta' :  { 'type' : 'text',
+                                                                     },
+                                                           'readonly' : True,
+                                                 }
+        if 'lowbat' in data:
+            self.controls_desc['low_battery'] =     { 'value' : 0,
+                                                      'meta' :  { 'type' : 'switch', 'readonly' : '1',
+                                                                },
+                                                      'readonly' : True,
+                                                 }
+
 
 
     def get_controls(self):
@@ -213,6 +293,26 @@ class OregonRxDevice(object):
             self.controls_desc['temperature']['value'] = data['temp']
         if 'humidity' in data:
             self.controls_desc['humidity']['value'] = data['humidity']
+        if 'comfort' in data:
+            self.controls_desc['comfort']['value'] = data['comfort']
+        if 'rain_rate' in data:
+            self.controls_desc['rain_rate']['value'] = data['rain_rate']
+        if 'rain_total' in data:
+            self.controls_desc['rain_total']['value'] = data['rain_total']
+        if 'uv' in data:
+            self.controls_desc['UV']['value'] = data['uv']
+        if 'wind_dir' in data:
+            self.controls_desc['wind_direction']['value'] = data['wind_dir']
+        if 'wind_speed' in data:
+            self.controls_desc['wind_speed']['value'] = data['wind_speed']
+        if 'wind_avg_speed' in data:
+            self.controls_desc['wind_average_speed']['value'] = data['wind_avg_speed']
+        if 'pressure' in data:
+            self.controls_desc['pressure']['value'] = data['pressure']
+        if 'forecast' in data:
+            self.controls_desc['weather_forecast']['value'] = data['forecast']
+        if 'lowbat' in data:
+            self.controls_desc['low_battery']['value'] = data['lowbat']
         return var
 
 
@@ -310,7 +410,8 @@ class NooliteRxDevice(object):
                                                    'readonly' : True,
                                                  }
 
-        if cmd == NooliteCommands.SetLevel:
+
+        if cmd in (NooliteCommands.SetLevel, NooliteCommands.ShadowSetBright):
             if 'level' in data:
                 try:
                     level = int(data['level'])

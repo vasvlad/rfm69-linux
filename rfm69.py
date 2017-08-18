@@ -89,11 +89,14 @@ class RFM69(object):
 
 	def start(self):
 		with self.lock:
-			while 1:
+			for i in xrange(100):
 				self.writeReg(REG_SYNCVALUE1, 0xaa)
 				val = self.readReg(REG_SYNCVALUE1)
 				if val == 0xaa:
 					break
+				time.sleep(0.02)
+			else:
+				raise RuntimeError("RFM69 does not respond")
 
 			self.config()
 			self.setStandby()
@@ -367,6 +370,7 @@ class RFM69(object):
 		self.writeReg(REG_TEMP1, RF_TEMP1_MEAS_START);
 		while ((self.readReg(REG_TEMP1) & RF_TEMP1_MEAS_RUNNING)):
 			print '*'
+			time.sleep(0.05)
 
 		return ~self.readReg(REG_TEMP2) + COURSE_TEMP_COEF + cal_factor # 'complement'corrects the slope, rising temp = rising val
 		#COURSE_TEMP_COEF puts reading in the ballpark, user can add additional correction
