@@ -67,6 +67,9 @@ class NooliteCommands(object):
     SlowUp = 3
     SlowSwitch = 5
     SlowStop = 10
+    TemporaryOn = 25
+    ShadowSetBright = 24
+    ShadowLoadPreset = 23
 
 
 
@@ -78,30 +81,9 @@ class NooliteCommands(object):
 
 class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
     name = "noo"
-    def __init__(self):
-        self.addr = None
+    def __init__(self, addr = 0x1234):
+        self.addr = addr
         self.flip = 0
-        self.getAddress()
-
-
-
-    def getAddress(self):
-        if self.addr is None:
-            # read mac
-            for iface in ('eth0', 'wlan0'):
-                mac_path = '/sys/class/net/%s/address' % iface
-                if os.path.exists(mac_path):
-                    try:
-                        parts = open(mac_path).read().strip().split(':')
-                        self.addr = (int(parts[-2], 16) << 8) + int(parts[-1], 16)
-                        print self.addr
-                        break
-                    except:
-                        pass
-
-
-        return self.addr
-
 
     def calcChecksum(self, flip_bit, cmd, addr, fmt = 0,  args=[]):
         #~ print "calcChecksum"
@@ -119,7 +101,6 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
         else:
             data = chr(flip_bit << 7) + chr(cmd)
 
-        #~ if fmt == 1:
         for arg in args:
             data += chr(arg)
 
@@ -172,6 +153,12 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
         elif fmt == 4:
             if len(args_data) != 0:
                return
+        elif fmt == 5:
+            if len(args_data) != 8:
+                return
+        elif fmt == 6:
+            if len(args_data) != 16:
+                return
         elif fmt == 7:
             if len(args_data) != 32:
                return
@@ -257,12 +244,23 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
                 kw['humidity'] =str(rel_humidity)
                 kw['lowbat'] = str(lowbat)
 
-            elif cmd == 6:
+            elif cmd == NooliteCommands.SetLevel:
+                if len(args) == 1:
+                    kw['level'] = str(args[0])
+                elif len(args) == 4:
+                    kw['r'] = str(args[0])
+                    kw['g'] = str(args[1])
+                    kw['b'] = str(args[2])
+
+
+            elif cmd == NooliteCommands.ShadowSetBright:
                 kw['level'] = str(args[0])
+            elif cmd == NooliteCommands.TemporaryOn :
+                quanta = args[0]
+                if len(args) > 1:
+                    quanta += args[1] * 256
 
-
-            #~ kw['crc'] = hex(crc)[2:]
-            #~ kw['crc_e'] = hex(crc_expected)[2:]
+                kw['timeout'] = str(quanta * 5)
 
 
             return kw
@@ -301,6 +299,25 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
                 else:
                     fmt = 1
                     args = [ int(kw['arg']) ]
+            elif cmd == NooliteCommands.ShadowSetBright:
+                args = [ int(kw['arg']) ]
+                fmt = 5
+            elif cmd == NooliteCommands.TemporaryOn:
+                timeout = int(kw['arg'])
+                if (timeout < 0) or (timeout > 65535):
+                    return
+
+                if timeout > 255:
+                    args = [timeout % 256, timeout / 256]
+                    fmt = 6
+                else:
+                    args = [timeout]
+                    fmt = 5
+
+            elif cmd in (NooliteCommands.SwitchMode,NooliteCommands.SwitchColor):
+                fmt = 4
+
+
 
 
             if 'crc' in kw:
@@ -312,24 +329,29 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
             addr_lo = addr & 0x00ff
 
             args_data = ''
-            if fmt == 1:
+            cmd_data = ''
+
+            if fmt in (0, 1, 3):
+                cmd_data = bin(cmd)[2:].zfill(4)[::-1]
+            else:
+                cmd_data = bin(cmd)[2:].zfill(8)[::-1]
+
+
+            if fmt in (1, 5):
                 args_data = bin(args[0])[2:].zfill(8)[::-1]
-            elif fmt == 4:
-                args_data = bin(args[0])[2:].zfill(4)[::-1],
             elif fmt == 3:
                 assert len(args) == 4
                 args_data = "".join(bin(args[i])[2:].zfill(8)[::-1] for i in xrange(4))
 
             packet = "".join(( '1',
                                 str(self.flip),
-                                bin(cmd)[2:].zfill(4)[::-1],
+                                cmd_data,
                                 args_data,
                                 bin(addr_lo)[2:].zfill(8)[::-1],
                                 bin(addr_hi)[2:].zfill(8)[::-1],
                                 bin(fmt)[2:].zfill(8)[::-1],
                                 bin(crc)[2:].zfill(8)[::-1] ))
 
-        print "packet: ", packet
 
 
 
@@ -352,6 +374,13 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
 
         return data
 
+
+
+
+
+
+
+
 #ch:2 r:1 g:1 b:1        110110          10000000 10000000 10000000 00000000 10011111 10100100 11000000 11001011  fmt=3
 #ch:2 r:1 g:1 b:2        100110          10000000 10000000 01000000 00000000 10011111 10100100 11000000 11101101  fmt=3
 #ch:2 r:255 g:255 b:255  110110          11111111 11111111 11111111 00000000 10011111 10100100 11000000 10110001  fmt=3
@@ -363,6 +392,14 @@ class NooliteProtocolHandler(protocols.BaseRCProtocolHandler):
 #ch:2 lvl=46             110110                                     01110100 10011111 10100100 10000000 10010100  fmt=1
 #ch:2 cmd=10             110101                                              10011111 10100100 00000000 00010001  fmt=0
 #ch:2 off_ch             110000                                              10011111 10100100 00000000 10000100  fmt=0
+
+
+
+# новая команда [5:14:05 PM] : 24 на 5 канал установить яркость 100
+
+#                                       11 00011000 00100110 10100000 01000100 10100000 00110110 fmt=5
+# ch:5 cmd=25 timeout=(25*256+1)*5               11 10011000 10000000 10011000 10100000 01000100 01100000 00100001 fmt=6
+
 
 #
 # temp/hum:

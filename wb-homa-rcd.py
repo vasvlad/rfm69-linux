@@ -81,7 +81,7 @@ def get_serial():
     if os.path.exists(path):
         return open(path).read().strip()
     else:
-        return ":".join(hex(random.randint(0,255))[2:].zfill(2) for _ in xrange(6))
+        raise RuntimeError("/var/lib/wirenboard/serial.conf doesn't exist")
 
 
 import mqtt_devices
@@ -290,7 +290,7 @@ class MQTTHandler(object):
         self.device_controls_cache[device.device_id] = copy.deepcopy(controls)
 
 
-        for control, desc in controls_diff.iteritems():
+        for control, desc in controls.iteritems():
             control_prefix = "/devices/%s/controls/%s" % (device.device_id, control)
             if 'value' in desc:
                 self.client.publish(control_prefix, desc['value'], 0, True)
@@ -351,35 +351,41 @@ class MQTTHandler(object):
 
 
     def on_mqtt_message(self, mosq, obj, msg):
-        #~ print "on_mqtt_message " , msg.topic
-        parts = msg.topic.split('/')
+        try:
+            #~ print "on_mqtt_message " , msg.topic
+            parts = msg.topic.split('/')
 
-        if mosquitto.topic_matches_sub('/devices/%s/meta/+' % self.mqtt_device_id, msg.topic):
-            name = parts[4]
-            self.on_config_parameter_received(name, msg.payload)
-
-
-
-
-        elif msg.topic == self.random_topic:
-            self.on_initial_retained_received()
-        elif mosquitto.topic_matches_sub('/devices/+/controls/+/on' , msg.topic):
-
-            device_id = parts[2]
-            control = parts[4]
-
-            for device in self.devices:
-                if device.device_id == device_id:
-                    ret = device.update_control(control, msg.payload)
-                    if ret is not None:
-                        self.client.publish("/devices/%s/controls/%s" % (device_id, control), ret, 0, True)
+            if mosquitto.topic_matches_sub('/devices/%s/meta/+' % self.mqtt_device_id, msg.topic):
+                name = parts[4]
+                self.on_config_parameter_received(name, msg.payload)
 
 
-                    break
-            else:
-                print "unknown device id ", device_id
 
 
+            elif msg.topic == self.random_topic:
+                self.on_initial_retained_received()
+            elif mosquitto.topic_matches_sub('/devices/+/controls/+/on' , msg.topic):
+
+                device_id = parts[2]
+                control = parts[4]
+
+
+
+
+                for device in self.devices:
+                    if device.device_id == device_id:
+                        ret = device.update_control(control, msg.payload)
+                        if ret is not None:
+                            self.client.publish("/devices/%s/controls/%s" % (device_id, control), ret, 0, True)
+
+
+                        break
+                else:
+                    print "unknown device id ", device_id
+
+        except:
+            import traceback
+            traceback.print_exc()
 
 
 
@@ -393,8 +399,12 @@ if __name__ == "__main__":
     radio_sender_thread.daemon = True
     radio_sender_thread.start()
 
-
     if len(sys.argv) > 2:
+        if len(sys.argv) > 3:
+            spi_major = int(sys.argv[3])
+        else:
+            spi_major = 0
+
         spi_minor = int(sys.argv[1])
         irq_gpio = int(sys.argv[2])
         # 7 55
@@ -402,7 +412,7 @@ if __name__ == "__main__":
         spi_minor = 5
         irq_gpio = 36
 
-    radio = rfm69.RFM69(spi_minor=spi_minor,irq_gpio=irq_gpio)
+    radio = rfm69.RFM69(spi_major=spi_major, spi_minor=spi_minor,irq_gpio=irq_gpio)
 
     radio.setPowerLevel(31)
     #~ radio.setHighPower(True)
