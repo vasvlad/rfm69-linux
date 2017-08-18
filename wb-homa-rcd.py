@@ -393,6 +393,11 @@ if __name__ == "__main__":
     radio_sender_thread.daemon = True
     radio_sender_thread.start()
 
+    spi_major = 0
+    spi_minor = 0
+    irq_gpio = 25
+
+
     if len(sys.argv) > 2:
         if len(sys.argv) > 3:
             spi_major = int(sys.argv[3])
