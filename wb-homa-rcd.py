@@ -82,7 +82,7 @@ def get_serial():
     if os.path.exists(path):
         return open(path).read().strip()
     else:
-        raise RuntimeError("/var/lib/wirenboard/serial.conf doesn't exist")
+        return ":".join(hex(random.randint(0,255))[2:].zfill(2) for _ in xrange(6))
 
 
 import mqtt_devices
