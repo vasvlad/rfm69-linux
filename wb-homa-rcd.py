@@ -359,14 +359,6 @@ class MQTTHandler(object):
             if mosquitto.topic_matches_sub('/devices/%s/meta/+' % self.mqtt_device_id, msg.topic):
                 name = parts[4]
                 self.on_config_parameter_received(name, msg.payload)
-
-
-
-
-            elif msg.topic == self.random_topic:
-                self.on_initial_retained_received()
-            elif mosquitto.topic_matches_sub('/devices/+/controls/+/on' , msg.topic):
-
             elif msg.topic == self.random_topic:
                 self.on_initial_retained_received()
             elif mosquitto.topic_matches_sub('/devices/+/controls/+/on' , msg.topic):
